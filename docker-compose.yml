@@ -1,0 +1,86 @@
+services:
+
+  # ================================
+  # MySQL Database
+  # ================================
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./db/init:/docker-entrypoint-initdb.d:ro  # scripts run once on first boot
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app_network
+
+  # ================================
+  # NestJS Backend
+  # ================================
+  backend:
+    build:
+      context: ./ttg-backend
+      dockerfile: Dockerfile
+      target: production
+    container_name: nestjs_backend
+    restart: unless-stopped
+    env_file:
+      - ./ttg-backend/.env
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_SYNC: ${DB_SYNC}
+      UI: ${UI}
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app_network
+
+  # ================================
+  # Vite + Tailwind Frontend
+  # ================================
+  frontend:
+    build:
+      context: ./ttg-fe
+      dockerfile: Dockerfile
+      target: production
+      args:
+        VITE_APP_URL: ${VITE_APP_URL}
+    container_name: vite_frontend
+    restart: unless-stopped
+    env_file:
+      - ./ttg-fe/.env
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - app_network
+
+# ================================
+# Volumes & Networks
+# ================================
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  app_network:
+    driver: bridge
