@@ -7,10 +7,13 @@ this app uses/exposes these ports to run, if you already use these ports please 
 please add .env variables in both `ttg/` directory and `ttg-backend/` directory.
 here's the example env for `ttg/` directory:
 ```
-DB_ROOT_PASSWORD=rahasia
+DB_ROOT_PASSWORD=pentolkanji
 DB_NAME=ttg
 DB_USER=hida
-DB_PASSWORD=rahasia
+DB_PASSWORD=pentolkanji
+DB_SYNC=true
+UI=frontend
+VITE_APP_URL=http://localhost:3000
 ```
 
 and here's the example env for `ttg-backend/` directory:
@@ -28,6 +31,8 @@ then run using this command
 ```
 docker compose up -d --build
 ```
+
+you can access the frontend through `http://localhost/`, and the backend through `http://localhost:3000`
 
 # leetcode 1
 
