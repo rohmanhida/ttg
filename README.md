@@ -36,5 +36,14 @@ you can access the frontend through `http://localhost/`, and the backend through
 
 # leetcode 1
 
+to run this function you can run this command, please make sure you have python installed
+```
+python3 number3.py
+```
 
 # leetcode 2
+
+to run this function you can run this command, please make sure you have python installed
+```
+python3 number4.py
+```
